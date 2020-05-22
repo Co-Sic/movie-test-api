@@ -1,13 +1,17 @@
-version: "3"
+version: "3.7"
 services:
   graphapi:
     build: .
     ports:
-      - "3000:3000"
+      - "4000:3000"
     depends_on:
       - mongodb
     command:
       - "--mongo-uri=mongodb://mongodb:27017/movies"
+    volumes:
+      - type: bind
+        source: ./src
+        target: /usr/src/app/src
   mongodb:
     image: "mongo"
     ports:

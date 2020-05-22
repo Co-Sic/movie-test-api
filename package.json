@@ -8,6 +8,7 @@
   "author": "",
   "scripts": {
     "start": "ts-node src/server.ts",
+    "start-dev": "ts-node-dev src/server.ts",
     "build": "tsc",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
