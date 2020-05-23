@@ -1,13 +1,6 @@
-import { currentUser, register, login } from "./auth";
+import auth from "./auth";
+import movies from "./movies";
+import actors from "./actors";
+import ratings from "./ratings";
 
-const resolverMap = {
-  Query: {
-    currentUser,
-  },
-  Mutation: {
-    login,
-    register,
-  },
-};
-
-export default resolverMap;
+export default [auth, movies, actors, ratings];

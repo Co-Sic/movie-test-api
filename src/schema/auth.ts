@@ -1,7 +1,10 @@
-const typeDef = `
+import { gql } from "apollo-server";
+
+const typeDef = gql`
     type User {
         id: ID!
         username: String!
+        ratings: [Rating!]!
     }
 
     type Query {
@@ -16,6 +19,7 @@ const typeDef = `
     type Mutation {
         register(username: String!, password: String!): User!
         login(username: String!, password: String!): LoginResponse!
-    }    
+    }
 `;
+
 export default typeDef;

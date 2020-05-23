@@ -1,14 +1,15 @@
-export interface RegisterResponse extends UserInfo {}
+export interface RegisterResponse extends UserInfo {
+}
 
 export interface LoginResponse {
-  token: string;
+    token: string;
 }
 
 export interface UserInfo {
-  id: string;
-  username: string;
+    id: string;
+    username: string;
 }
 
 export interface Context {
-  userInfo: UserInfo;
+    userInfo: UserInfo;
 }
