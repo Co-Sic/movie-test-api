@@ -16,19 +16,7 @@ export async function addMovie(_: void, args: any): Promise<Movie> {
     }
 
     // Map actor names to database entries
-    const actorArray: Actor[] = [];
-    for (let i = 0; i < actors.length; i++) {
-        let existingActor: Actor | null = await ActorModel.findOne({name: actors[i]});
-        if (existingActor !== null) {
-            actorArray.push(existingActor);
-        } else {
-            let newActor: Actor = new ActorModel({
-                name: actors[i],
-            });
-            await newActor.save();
-            actorArray.push(newActor);
-        }
-    }
+    let actorArray = await mapNewActors(actors);
 
     const movie: Movie = new MovieModel({
         name,
@@ -52,7 +40,7 @@ async function deleteMovie(_: void, args: any): Promise<boolean> {
 }
 
 async function editMovie(_: void, args: any): Promise<Movie> {
-    const {id, name, releaseDate, durationSeconds } = args;
+    const {id, name, releaseDate, durationSeconds, actors } = args;
     const movie: Movie | null = await MovieModel.findById(id);
     if (movie === null) {
         throw new Error("Movie does not exist");
@@ -67,9 +55,29 @@ async function editMovie(_: void, args: any): Promise<Movie> {
         movie.durationSeconds = durationSeconds;
     }
 
-    //todo: actors
+    // Map actor names to database entries
+    let actorArray = await mapNewActors(actors);
+    movie.actors = actorArray;
+
     await movie.save();
     return movie;
+}
+
+async function mapNewActors(actorsNames: string[]): Promise<Actor[]> {
+    const actorArray: Actor[] = [];
+    for (let i = 0; i < actorsNames.length; i++) {
+        let existingActor: Actor | null = await ActorModel.findOne({name: actorsNames[i]});
+        if (existingActor !== null) {
+            actorArray.push(existingActor);
+        } else {
+            let newActor: Actor = new ActorModel({
+                name: actorsNames[i],
+            });
+            await newActor.save();
+            actorArray.push(newActor);
+        }
+    }
+    return actorArray;
 }
 
 export default {
