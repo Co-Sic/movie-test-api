@@ -5,7 +5,7 @@ export interface Movie extends mongoose.Document {
     _id: string;
     name: string;
     releaseDate: Date;
-    duration: number;
+    durationSeconds: number;
     actors: Actor[];
     ratings: Rating[];
 }
@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema(
     {
         name: {type: String, required: true},
         releaseDate: {type: Date, required: true},
-        duration: {type: Number, required: true},
+        durationSeconds: {type: Number, required: true},
         actors: [{type: Schema.Types.ObjectId, ref: "Actor"}],
         ratings: [{type: Schema.Types.ObjectId, ref: "Rating"}],
     },

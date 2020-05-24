@@ -4,8 +4,12 @@ async function movies(_: void): Promise<Movie[]> {
     return MovieModel.find({}).populate("actors").populate("ratings");
 }
 
-async function addMovie(_: void, args: any): Promise<Movie> {
-    const {name, releaseDate, duration, actors} = args;
+async function releaseDate(parent: Movie): Promise<String> {
+    return parent.releaseDate.toLocaleDateString();
+}
+
+export async function addMovie(_: void, args: any): Promise<Movie> {
+    const {name, releaseDate, durationSeconds, actors} = args;
     const existingMovie: number = await MovieModel.countDocuments({name});
     if (existingMovie) {
         throw new Error("Movie already in Database!");
@@ -29,7 +33,7 @@ async function addMovie(_: void, args: any): Promise<Movie> {
     const movie: Movie = new MovieModel({
         name,
         releaseDate,
-        duration,
+        durationSeconds,
         actors: actorArray,
     });
     await movie.save();
@@ -48,7 +52,7 @@ async function deleteMovie(_: void, args: any): Promise<boolean> {
 }
 
 async function editMovie(_: void, args: any): Promise<Movie> {
-    const {id, name, releaseDate, duration } = args;
+    const {id, name, releaseDate, durationSeconds } = args;
     const movie: Movie | null = await MovieModel.findById(id);
     if (movie === null) {
         throw new Error("Movie does not exist");
@@ -59,8 +63,8 @@ async function editMovie(_: void, args: any): Promise<Movie> {
     if (releaseDate !== null && releaseDate !== undefined) {
         movie.releaseDate = releaseDate;
     }
-    if (duration !== null && duration !== undefined) {
-        movie.duration = duration;
+    if (durationSeconds !== null && durationSeconds !== undefined) {
+        movie.durationSeconds = durationSeconds;
     }
 
     //todo: actors
@@ -77,5 +81,8 @@ export default {
         deleteMovie,
         editMovie,
     },
+    Movie: {
+        releaseDate,
+    }
 
 };

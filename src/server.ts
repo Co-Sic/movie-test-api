@@ -4,6 +4,7 @@ import { ApolloServer } from "apollo-server";
 import { getUserInfo } from "./auth";
 import typeDefs from "./schema";
 import resolvers from "./resolvers";
+import initData from "./initialData";
 
 const args = yargs.option("mongo-uri", {
   describe: "Mongo URI",
@@ -17,8 +18,9 @@ async function start() {
     await mongoose.connect(args["mongo-uri"], {
       useUnifiedTopology: true,
       useNewUrlParser: true,
-    });
+    }).then(() => initData());
     console.log("Connected to DB.");
+
 
     await new ApolloServer({
       typeDefs,

@@ -5,14 +5,14 @@ const typeDef = gql`
         id: ID!
         name: String!
         releaseDate: String!
-        duration: Int!
+        durationSeconds: Int!
         actors: [Actor!]!
         ratings: [Rating!]!
     }
     extend type Mutation {
-        addMovie(name: String!, releaseDate: String!, duration: Int!, actors:[String!]): Movie!
+        addMovie(name: String!, releaseDate: String!, durationSeconds: Int!, actors:[String!]): Movie!
         deleteMovie(id: String!): Boolean!
-        editMovie(id: ID!, name: String, releaseDate: String, duration: Int, actors:[String!]): Movie!
+        editMovie(id: ID!, name: String, releaseDate: String, durationSeconds: Int, actors:[String!]): Movie!
     }
     
     extend type Query {
