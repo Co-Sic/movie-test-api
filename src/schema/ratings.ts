@@ -9,9 +9,16 @@ const typeDef = gql`
         movie: Movie!
     }
     
+    extend type Query {
+        ratingsForMovie(movieId: String!): [Rating!]!
+        alreadyRated(movieId:String!): Boolean!
+    }
+    
     extend type Mutation {
         addRating(movieId: String!, value: Int!, comment: String!):Rating!
     }
+    
+    
 `;
 
 export default typeDef;

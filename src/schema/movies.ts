@@ -17,6 +17,7 @@ const typeDef = gql`
     
     extend type Query {
         movies: [Movie!]!
+        movie(id: String!): Movie!
     }
     
 `;

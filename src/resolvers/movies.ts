@@ -1,11 +1,23 @@
-import {Actor, ActorModel, Movie, MovieModel} from "../models";
+import {Actor, ActorModel, Movie, MovieModel, Rating, RatingModel} from "../models";
 
 async function movies(_: void): Promise<Movie[]> {
     return MovieModel.find({}).populate("actors").populate("ratings");
 }
 
+async function movie(_: void, args: any): Promise<Movie> {
+    const movie: Movie | null = await MovieModel.findById(args.id).populate("actors").populate("ratings");
+    if (movie === null) {
+        throw new Error("Movie does not exist!");
+    }
+    return movie;
+}
+
 async function releaseDate(parent: Movie): Promise<String> {
     return parent.releaseDate.toLocaleDateString();
+}
+
+async function ratings(parent: Movie): Promise<Rating[]> {
+    return await RatingModel.find({movie: parent}).populate("user");
 }
 
 export async function addMovie(_: void, args: any): Promise<Movie> {
@@ -56,8 +68,7 @@ async function editMovie(_: void, args: any): Promise<Movie> {
     }
 
     // Map actor names to database entries
-    let actorArray = await mapNewActors(actors);
-    movie.actors = actorArray;
+    movie.actors = await mapNewActors(actors);
 
     await movie.save();
     return movie;
@@ -83,6 +94,7 @@ async function mapNewActors(actorsNames: string[]): Promise<Actor[]> {
 export default {
     Query: {
         movies,
+        movie,
     },
     Mutation: {
         addMovie,
@@ -91,6 +103,7 @@ export default {
     },
     Movie: {
         releaseDate,
+        ratings,
     }
 
 };

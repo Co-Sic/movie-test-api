@@ -1,19 +1,33 @@
-import {Movie, MovieModel, Rating, RatingModel, User, UserModel} from "../models";
+import {Movie, MovieModel, Rating, RatingModel} from "../models";
 import {Context} from "../types";
+import {getUserFromContext} from "./auth";
+
+async function ratingsForMovie(_: void, args: any): Promise<Rating[]> {
+    const { movieId } = args;
+    const movie: Movie | null = await MovieModel.findById(movieId);
+    if (movie === null) {
+        throw new Error("Movie does not exist!");
+    }
+    return RatingModel.find({movie: movie}).populate("user");
+}
 
 
+async function alreadyRated(_: void, args: any, ctx: Context): Promise<boolean> {
+    const { movieId } = args;
+    const user = await getUserFromContext(ctx);
+    const ratings = await ratingsForMovie(undefined, {movieId: movieId});
+    for (let i = 0; i < ratings.length; i++) {
+        if (ratings[i].user._id.toString() === user._id.toString()) {
+            return true;
+        }
+    }
+    return false;
+}
 
 async function addRating(_: void, args: any, ctx: Context): Promise<Rating> {
     const {movieId, value, comment} = args;
 
-    const {userInfo} = ctx;
-    if (!userInfo) {
-        throw new Error("Not authenticated!");
-    }
-    const user: User | null = await UserModel.findOne({_id: userInfo.id});
-    if (!user) {
-        throw new Error("Not authenticated!");
-    }
+    const user = await getUserFromContext(ctx);
 
     const movie: Movie | null = await MovieModel.findById(movieId);
     if (movie === null) {
@@ -38,6 +52,10 @@ async function addRating(_: void, args: any, ctx: Context): Promise<Rating> {
 
 export default {
     Mutation: {
-        addRating
-    }
+        addRating,
+    },
+    Query: {
+        ratingsForMovie,
+        alreadyRated,
+    },
 }
