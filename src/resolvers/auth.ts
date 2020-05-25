@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {LoginResponse, RegisterResponse, UserInfo, Context} from "../types";
 import {User, UserModel} from "../models";
+import { AuthenticationError } from "apollo-server";
 
 export async function register(_: void, args: any): Promise<RegisterResponse> {
     const {username, password} = args;
@@ -48,20 +49,24 @@ export async function currentUser(
     _args: any,
     ctx: Context,
 ): Promise<UserInfo> {
-    const {userInfo} = ctx;
-    if (!userInfo) {
-        throw new Error("Not authenticated!");
-    }
-    const user: User | null = await UserModel.findOne({_id: userInfo.id});
-    if (!user) {
-        throw new Error("Not authenticated!");
-    }
+    const user = await getUserFromContext(ctx);
     return {
         id: user._id,
         username: user.username,
     };
 }
 
+export async function getUserFromContext(ctx: Context): Promise<User> {
+    const {userInfo} = ctx;
+    if (!userInfo) {
+        throw new AuthenticationError("Not authenticated!");
+    }
+    const user: User | null = await UserModel.findOne({_id: userInfo.id});
+    if (!user) {
+        throw new AuthenticationError("Not authenticated!");
+    }
+    return user;
+}
 
 export default {
     Query: {
