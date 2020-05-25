@@ -22,4 +22,4 @@ docker-compose build
 docker-compose up
 ```
 
-Test running server by accessing `http://localhost:3000/`
+Test running server by accessing `http://localhost:4000/`
