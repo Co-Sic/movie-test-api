@@ -1,7 +1,26 @@
-import {Actor, ActorModel, Movie, MovieModel, Rating, RatingModel} from "../models";
+import {Actor, ActorModel, Movie, MovieModel} from "../models";
+import {MovieResponse} from "../types";
 
-async function movies(_: void): Promise<Movie[]> {
-    return MovieModel.find({}).populate("actors").populate("ratings");
+async function movies(_: void): Promise<MovieResponse[]> {
+    return (await MovieModel.find({}).populate("actors").populate("ratings")).map(m => {
+            return {
+                id: m._id,
+                name: m.name,
+                durationSeconds: m.durationSeconds,
+                releaseDate: m.releaseDate,
+                actors: m.actors,
+                averageRating: m.ratings.map(r => r.value).reduce(((a, b)=> a + b), 0),
+                ratingCount: m.ratings.length,
+            }
+        }
+    ).map(m => {
+        if (m.ratingCount > 0) {
+            m.averageRating = m.averageRating / m.ratingCount;
+        } else {
+            m.averageRating = 3;
+        }
+        return m;
+    });
 }
 
 async function movie(_: void, args: any): Promise<Movie> {
@@ -16,9 +35,9 @@ async function releaseDate(parent: Movie): Promise<String> {
     return parent.releaseDate.toLocaleDateString();
 }
 
-async function ratings(parent: Movie): Promise<Rating[]> {
-    return await RatingModel.find({movie: parent}).populate("user");
-}
+// async function ratings(parent: Movie): Promise<Rating[]> {
+//     return RatingModel.find({movie: parent}).populate("user");
+// }
 
 export async function addMovie(_: void, args: any): Promise<Movie> {
     const {name, releaseDate, durationSeconds, actors} = args;
@@ -103,7 +122,6 @@ export default {
     },
     Movie: {
         releaseDate,
-        ratings,
     }
 
 };

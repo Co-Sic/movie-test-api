@@ -7,7 +7,8 @@ const typeDef = gql`
         releaseDate: String!
         durationSeconds: Int!
         actors: [Actor!]!
-        ratings: [Rating!]!
+        averageRating: Float!
+        ratingCount: Int!
     }
     extend type Mutation {
         addMovie(name: String!, releaseDate: String!, durationSeconds: Int!, actors:[String!]!): Movie!
