@@ -23,6 +23,10 @@ async function start() {
 
 
     await new ApolloServer({
+      cors: {
+        origin: "*",
+        credentials: true
+      },
       typeDefs,
       resolvers,
       context: ({ req }) => ({
