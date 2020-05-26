@@ -1,43 +1,47 @@
 import mongoose from "mongoose";
 import yargs from "yargs";
-import { ApolloServer } from "apollo-server";
-import { getUserInfo } from "./auth";
+import {ApolloServer} from "apollo-server";
+import {getUserInfo} from "./auth";
 import typeDefs from "./schema";
 import resolvers from "./resolvers";
 import initData from "./initialData";
 
 const args = yargs.option("mongo-uri", {
-  describe: "Mongo URI",
-  default: "mongodb://localhost:27017/movies",
-  type: "string",
-  group: "Mongo",
+    describe: "Mongo URI",
+    default: "mongodb://localhost:27017/movies",
+    type: "string",
+    group: "Mongo",
 }).argv;
 
 async function start() {
-  try {
-    await mongoose.connect(args["mongo-uri"], {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    }).then(() => initData());
-    console.log("Connected to DB.");
+    try {
+        await mongoose.connect(args["mongo-uri"], {
+            useUnifiedTopology: true,
+            useNewUrlParser: true,
+        }).then(() => initData());
+        console.log("Connected to DB.");
 
-
-    await new ApolloServer({
-      cors: {
-        origin: "*",
-        credentials: true
-      },
-      typeDefs,
-      resolvers,
-      context: ({ req }) => ({
-        userInfo: getUserInfo(req.headers.authorization || ""),
-      }),
-    }).listen(3000);
-    console.log("GraphQl API running on port 3000.");
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
+        await new ApolloServer({
+            cors: {
+                origin: "*",
+                credentials: true
+            },
+            typeDefs,
+            resolvers,
+            context: async ({req, connection}) => {
+                if (connection) {
+                    // check connection for metadata
+                    return connection.context;
+                } else {
+                    return {userInfo: getUserInfo(req.headers.authorization || "")};
+                }
+            },
+        }).listen(3000);
+        console.log("GraphQl API running on port 3000.");
+    } catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
 }
 
 start();
