@@ -7,7 +7,7 @@ async function movies(_: void): Promise<MovieResponse[]> {
     return (await MovieModel.find({}).populate("actors").populate("ratings")).map(mapMovie)
 }
 
-async function movie(_: void, args: any): Promise<MovieResponse> {
+export async function movie(_: void, args: any): Promise<MovieResponse> {
     const movie: Movie | null = await MovieModel.findById(args.id).populate("actors").populate("ratings");
     if (movie === null) {
         throw new Error("Movie does not exist!");
@@ -16,7 +16,7 @@ async function movie(_: void, args: any): Promise<MovieResponse> {
 }
 
 // map movie
-function mapMovie(movie: Movie): MovieResponse {
+export function mapMovie(movie: Movie): MovieResponse {
     let movieResult = {
         id: movie._id,
         name: movie.name,
@@ -28,8 +28,6 @@ function mapMovie(movie: Movie): MovieResponse {
     };
     if (movieResult.ratingCount > 0) {
         movieResult.averageRating = movieResult.averageRating / movieResult.ratingCount;
-    } else {
-        movieResult.averageRating = 3;
     }
     return movieResult;
 }

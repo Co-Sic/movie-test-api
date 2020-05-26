@@ -3,7 +3,7 @@ import {Context} from "../types";
 import {getUserFromContext} from "./auth";
 import pubsub from "../pubsub";
 
-async function ratingsForMovie(_: void, args: any): Promise<Rating[]> {
+export async function ratingsForMovie(_: void, args: any): Promise<Rating[]> {
     const {movieId} = args;
     const movie: Movie | null = await MovieModel.findById(movieId);
     if (movie === null) {
