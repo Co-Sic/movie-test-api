@@ -10,6 +10,12 @@ const typeDef = gql`
         averageRating: Float!
         ratingCount: Int!
     }
+    
+    type MovieAction {
+        movie: Movie!
+        user: User!
+    }
+    
     extend type Mutation {
         addMovie(name: String!, releaseDate: String!, durationSeconds: Int!, actors:[String!]!): Movie!
         deleteMovie(id: String!): Boolean!
@@ -19,6 +25,12 @@ const typeDef = gql`
     extend type Query {
         movies: [Movie!]!
         movie(id: String!): Movie!
+    }
+    
+    extend type Subscription {
+        movieAdded: MovieAction!
+        movieDeleted: MovieAction!
+        movieEdited: MovieAction!
     }
     
 `;

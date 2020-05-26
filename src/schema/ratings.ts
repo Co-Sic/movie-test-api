@@ -17,7 +17,10 @@ const typeDef = gql`
     extend type Mutation {
         addRating(movieId: String!, value: Int!, comment: String!):Rating!
     }
-    
+
+    type Subscription {
+        ratingAdded: Rating!
+    }
     
 `;
 

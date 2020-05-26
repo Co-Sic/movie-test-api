@@ -25,3 +25,8 @@ export interface MovieResponse {
     averageRating: number;
     ratingCount: number;
 }
+
+export interface MovieAction {
+    movie: MovieResponse;
+    user: UserInfo;
+}

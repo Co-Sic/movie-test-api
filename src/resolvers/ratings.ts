@@ -1,9 +1,10 @@
 import {Movie, MovieModel, Rating, RatingModel} from "../models";
 import {Context} from "../types";
 import {getUserFromContext} from "./auth";
+import pubsub from "../pubsub";
 
 async function ratingsForMovie(_: void, args: any): Promise<Rating[]> {
-    const { movieId } = args;
+    const {movieId} = args;
     const movie: Movie | null = await MovieModel.findById(movieId);
     if (movie === null) {
         throw new Error("Movie does not exist!");
@@ -13,7 +14,7 @@ async function ratingsForMovie(_: void, args: any): Promise<Rating[]> {
 
 
 async function alreadyRated(_: void, args: any, ctx: Context): Promise<boolean> {
-    const { movieId } = args;
+    const {movieId} = args;
     const user = await getUserFromContext(ctx);
     const ratings = await ratingsForMovie(undefined, {movieId: movieId});
     for (let i = 0; i < ratings.length; i++) {
@@ -47,6 +48,12 @@ async function addRating(_: void, args: any, ctx: Context): Promise<Rating> {
     await rating.save();
     movie.ratings.push(rating);
     await movie.save();
+
+    // push change to clients
+    await pubsub.publish("ratingAdded", {
+        ratingAdded: rating,
+    });
+
     return rating;
 }
 
@@ -57,5 +64,10 @@ export default {
     Query: {
         ratingsForMovie,
         alreadyRated,
+    },
+    Subscription: {
+        ratingAdded: {
+            subscribe: () => pubsub.asyncIterator("ratingAdded")
+        },
     },
 }

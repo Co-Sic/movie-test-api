@@ -1,5 +1,7 @@
 import {Actor, ActorModel, Movie, MovieModel} from "../models";
-import {MovieResponse} from "../types";
+import {Context, MovieResponse} from "../types";
+import pubsub from "../pubsub";
+import {getUserFromContext} from "./auth";
 
 async function movies(_: void): Promise<MovieResponse[]> {
     return (await MovieModel.find({}).populate("actors").populate("ratings")).map(mapMovie)
@@ -36,12 +38,9 @@ async function releaseDate(parent: Movie): Promise<String> {
     return parent.releaseDate.toLocaleDateString();
 }
 
-// async function ratings(parent: Movie): Promise<Rating[]> {
-//     return RatingModel.find({movie: parent}).populate("user");
-// }
-
-export async function addMovie(_: void, args: any): Promise<Movie> {
+export async function addMovie(_: void, args: any, ctx: Context): Promise<Movie> {
     const {name, releaseDate, durationSeconds, actors} = args;
+    const user = await getUserFromContext(ctx);
     const existingMovie: number = await MovieModel.countDocuments({name});
     if (existingMovie) {
         throw new Error("Movie already in Database!");
@@ -63,16 +62,39 @@ export async function addMovie(_: void, args: any): Promise<Movie> {
         await actorArray[i].save();
     }
 
+    // push change to clients
+    await pubsub.publish("movieAdded", {
+        movieAdded: {
+            movie: movie,
+            user: user
+        }
+    });
+
     return movie;
 }
 
-async function deleteMovie(_: void, args: any): Promise<boolean> {
-    const { id } = args;
-    return (await MovieModel.findOneAndDelete({_id: id})) != null;
+async function deleteMovie(_: void, args: any, ctx: Context): Promise<boolean> {
+    const {id} = args;
+    const user = await getUserFromContext(ctx);
+    const movie = await MovieModel.findOneAndDelete({_id: id});
+
+    if (movie !== null) {
+        // push change to clients
+        await pubsub.publish("movieDeleted", {
+            movieDeleted: {
+                movie: movie,
+                user: user
+            }
+        });
+        return true;
+    }
+
+    return false;
 }
 
-async function editMovie(_: void, args: any): Promise<Movie> {
-    const {id, name, releaseDate, durationSeconds, actors } = args;
+async function editMovie(_: void, args: any, ctx: Context): Promise<Movie> {
+    const {id, name, releaseDate, durationSeconds, actors} = args;
+    const user = await getUserFromContext(ctx);
     const movie: Movie | null = await MovieModel.findById(id);
     if (movie === null) {
         throw new Error("Movie does not exist");
@@ -91,6 +113,15 @@ async function editMovie(_: void, args: any): Promise<Movie> {
     movie.actors = await mapNewActors(actors);
 
     await movie.save();
+
+    // push change to clients
+    await pubsub.publish("movieEdited", {
+        movieEdited: {
+            movie: movie,
+            user: user
+        }
+    });
+
     return movie;
 }
 
@@ -111,6 +142,7 @@ async function mapNewActors(actorsNames: string[]): Promise<Actor[]> {
     return actorArray;
 }
 
+
 export default {
     Query: {
         movies,
@@ -120,6 +152,17 @@ export default {
         addMovie,
         deleteMovie,
         editMovie,
+    },
+    Subscription: {
+        movieAdded: {
+            subscribe: () => pubsub.asyncIterator("movieAdded")
+        },
+        movieDeleted: {
+            subscribe: () => pubsub.asyncIterator("movieDeleted")
+        },
+        movieEdited: {
+            subscribe: () => pubsub.asyncIterator("movieEdited")
+        }
     },
     Movie: {
         releaseDate,
