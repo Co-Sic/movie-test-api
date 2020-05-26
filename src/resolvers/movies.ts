@@ -2,33 +2,34 @@ import {Actor, ActorModel, Movie, MovieModel} from "../models";
 import {MovieResponse} from "../types";
 
 async function movies(_: void): Promise<MovieResponse[]> {
-    return (await MovieModel.find({}).populate("actors").populate("ratings")).map(m => {
-            return {
-                id: m._id,
-                name: m.name,
-                durationSeconds: m.durationSeconds,
-                releaseDate: m.releaseDate,
-                actors: m.actors,
-                averageRating: m.ratings.map(r => r.value).reduce(((a, b)=> a + b), 0),
-                ratingCount: m.ratings.length,
-            }
-        }
-    ).map(m => {
-        if (m.ratingCount > 0) {
-            m.averageRating = m.averageRating / m.ratingCount;
-        } else {
-            m.averageRating = 3;
-        }
-        return m;
-    });
+    return (await MovieModel.find({}).populate("actors").populate("ratings")).map(mapMovie)
 }
 
-async function movie(_: void, args: any): Promise<Movie> {
+async function movie(_: void, args: any): Promise<MovieResponse> {
     const movie: Movie | null = await MovieModel.findById(args.id).populate("actors").populate("ratings");
     if (movie === null) {
         throw new Error("Movie does not exist!");
     }
-    return movie;
+    return mapMovie(movie);
+}
+
+// map movie
+function mapMovie(movie: Movie): MovieResponse {
+    let movieResult = {
+        id: movie._id,
+        name: movie.name,
+        durationSeconds: movie.durationSeconds,
+        releaseDate: movie.releaseDate,
+        actors: movie.actors,
+        averageRating: movie.ratings.map(r => r.value).reduce(((a, b) => a + b), 0),
+        ratingCount: movie.ratings.length,
+    };
+    if (movieResult.ratingCount > 0) {
+        movieResult.averageRating = movieResult.averageRating / movieResult.ratingCount;
+    } else {
+        movieResult.averageRating = 3;
+    }
+    return movieResult;
 }
 
 async function releaseDate(parent: Movie): Promise<String> {
