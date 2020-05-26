@@ -1,5 +1,8 @@
 import {addMovie} from "./resolvers/movies";
-import {register} from "./resolvers/auth";
+import {Context} from "./types";
+import {UserModel} from "./models";
+import bcrypt from "bcryptjs";
+import {addRating} from "./resolvers/ratings";
 
 interface MovieDefinition {
     name: string;
@@ -8,24 +11,18 @@ interface MovieDefinition {
     actors: string[];
 }
 
-interface UserDefinition {
-    username: string;
-    password: string;
-}
-
-const users: UserDefinition[] = [
-    {
-        username: "InitialUser1",
-        password: "password",
-    },
-];
-
 const movies: MovieDefinition[] = [
     {
-        name: "Pulp Fiction",
-        durationSeconds: 154 * 60,
-        releaseDate: new Date("1994-10-14"),
-        actors: ["John Travolta", "Uma Thurman", "Samuel L. Jackson", "Bruce Willis"]
+        name: "Goodfellas",
+        durationSeconds: 146 * 60,
+        releaseDate: new Date("1990-09-21"),
+        actors: ["Robert De Niro", "Ray Liotta", "Joe Pesci"]
+    },
+    {
+        name: "John Wick",
+        durationSeconds: 101 * 60,
+        releaseDate: new Date("2014-10-24"),
+        actors: ["Robert De Niro", "Ray Liotta", "Joe Pesci"]
     },
     {
         name: "Monty Python and the Holy Grail",
@@ -44,24 +41,36 @@ const movies: MovieDefinition[] = [
         durationSeconds: 108 * 60,
         releaseDate: new Date("1999-09-14"),
         actors: ["Willem Dafoe", "Sean Patrick Flanery", "Norman Reedus"]
-    }
+    },
+    {
+        name: "Pulp Fiction",
+        durationSeconds: 154 * 60,
+        releaseDate: new Date("1994-10-14"),
+        actors: ["John Travolta", "Uma Thurman", "Samuel L. Jackson", "Bruce Willis"]
+    },
 ];
 
 async function initData() {
-    for (let i = 0; i < users.length; i++) {
-        try {
-            await register(undefined, {...users[i]});
-        } catch (e) {
-            // error not relevant for data seeding
+    try {
+        // await register(undefined, {username: "admin", password: "admin"});
+        // // const {token} = await login(undefined, {username: "admin", password: "admin"});
+        // await
+        const user = new UserModel({
+            username: "admin",
+            password: await bcrypt.hash("admin", 10),
+        });
+        await user.save();
+        const context: Context = {userInfo: {username: user.username, id: user._id}};
+        let movie;
+        for (let i = 0; i < movies.length; i++) {
+            movie = await addMovie(undefined, {...movies[i]}, context);
         }
-    }
 
-    for (let i = 0; i < movies.length; i++) {
-        try {
-            await addMovie(undefined, {...movies[i]});
-        } catch (e) {
-            // error not relevant for data seeding
-        }
+        await addRating(undefined, {movieId: movie?.id, value: 5, comment:"Best Movie!!!!"}, context);
+
+    } catch (e) {
+        // error not relevant for data seeding
+        console.log(e);
     }
 
 }

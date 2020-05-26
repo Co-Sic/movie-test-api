@@ -25,7 +25,7 @@ async function alreadyRated(_: void, args: any, ctx: Context): Promise<boolean> 
     return false;
 }
 
-async function addRating(_: void, args: any, ctx: Context): Promise<Rating> {
+export async function addRating(_: void, args: any, ctx: Context): Promise<Rating> {
     const {movieId, value, comment} = args;
 
     const user = await getUserFromContext(ctx);
