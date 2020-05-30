@@ -1,8 +1,8 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, {Schema, Types} from "mongoose";
 import {Actor, Rating} from ".";
 
 export interface Movie extends mongoose.Document {
-    _id: string;
+    _id: Types.ObjectId;
     name: string;
     releaseDate: Date;
     durationSeconds: number;

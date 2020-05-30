@@ -18,7 +18,7 @@ export async function movie(_: void, args: any): Promise<MovieResponse> {
 // map movie
 export function mapMovie(movie: Movie): MovieResponse {
     let movieResult = {
-        id: movie._id,
+        id: movie._id.toHexString(),
         name: movie.name,
         durationSeconds: movie.durationSeconds,
         releaseDate: movie.releaseDate,

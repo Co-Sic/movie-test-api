@@ -60,7 +60,7 @@ async function initData() {
             password: await bcrypt.hash("admin", 10),
         });
         await user.save();
-        const context: Context = {userInfo: {username: user.username, id: user._id}};
+        const context: Context = {userInfo: {username: user.username, id: user._id.toHexString()}};
         let movie;
         for (let i = 0; i < movies.length; i++) {
             movie = await addMovie(undefined, {...movies[i]}, context);

@@ -17,7 +17,7 @@ export async function register(_: void, args: any): Promise<RegisterResponse> {
     });
     await user.save();
     return {
-        id: user._id,
+        id: user._id.toHexString(),
         username: user.username,
     };
 }
@@ -51,7 +51,7 @@ export async function currentUser(
 ): Promise<UserInfo> {
     const user = await getUserFromContext(ctx);
     return {
-        id: user._id,
+        id: user._id.toHexString(),
         username: user.username,
     };
 }

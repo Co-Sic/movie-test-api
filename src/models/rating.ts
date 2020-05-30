@@ -1,8 +1,8 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, {Schema, Types} from "mongoose";
 import { User, Movie } from ".";
 
 export interface Rating extends mongoose.Document {
-    _id: string;
+    _id: Types.ObjectId;
     value: number;
     comment: string;
     user: User;
