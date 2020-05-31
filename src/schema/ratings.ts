@@ -7,6 +7,7 @@ const typeDef = gql`
         comment: String!
         user: User!
         movie: Movie!
+        dateCreated: String!
     }
     
     extend type Query {

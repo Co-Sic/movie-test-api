@@ -45,6 +45,7 @@ export async function addRating(_: void, args: any, ctx: Context): Promise<Ratin
         movie,
         user,
     });
+
     await rating.save();
     movie.ratings.push(rating);
     await movie.save();
@@ -55,6 +56,10 @@ export async function addRating(_: void, args: any, ctx: Context): Promise<Ratin
     });
 
     return rating;
+}
+
+async function dateCreated(parent: Rating): Promise<String> {
+    return parent._id.getTimestamp().toLocaleDateString();
 }
 
 export default {
@@ -70,4 +75,7 @@ export default {
             subscribe: () => pubsub.asyncIterator("ratingAdded")
         },
     },
+    Rating: {
+        dateCreated,
+    }
 }
