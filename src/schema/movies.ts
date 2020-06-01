@@ -14,6 +14,7 @@ const typeDef = gql`
     type MovieAction {
         movie: Movie!
         user: User!
+        type: String!
     }
     
     extend type Mutation {
@@ -28,9 +29,7 @@ const typeDef = gql`
     }
     
     extend type Subscription {
-        movieAdded: MovieAction!
-        movieDeleted: MovieAction!
-        movieEdited: MovieAction!
+        movieAction: MovieAction!
     }
     
 `;

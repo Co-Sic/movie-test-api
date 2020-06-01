@@ -61,10 +61,11 @@ export async function addMovie(_: void, args: any, ctx: Context): Promise<Movie>
     }
 
     // push change to clients
-    await pubsub.publish("movieAdded", {
-        movieAdded: {
+    await pubsub.publish("movieAction", {
+        movieAction: {
             movie: movie,
-            user: user
+            user: user,
+            type: "added",
         }
     });
 
@@ -78,10 +79,11 @@ async function deleteMovie(_: void, args: any, ctx: Context): Promise<boolean> {
 
     if (movie !== null) {
         // push change to clients
-        await pubsub.publish("movieDeleted", {
-            movieDeleted: {
+        await pubsub.publish("movieAction", {
+            movieAction: {
                 movie: movie,
-                user: user
+                user: user,
+                type: "deleted",
             }
         });
         return true;
@@ -113,10 +115,11 @@ async function editMovie(_: void, args: any, ctx: Context): Promise<Movie> {
     await movie.save();
 
     // push change to clients
-    await pubsub.publish("movieEdited", {
-        movieEdited: {
+    await pubsub.publish("movieAction", {
+        movieAction: {
             movie: movie,
-            user: user
+            user: user,
+            type: "edited",
         }
     });
 
@@ -152,15 +155,9 @@ export default {
         editMovie,
     },
     Subscription: {
-        movieAdded: {
-            subscribe: () => pubsub.asyncIterator("movieAdded")
+        movieAction: {
+            subscribe: () => pubsub.asyncIterator("movieAction")
         },
-        movieDeleted: {
-            subscribe: () => pubsub.asyncIterator("movieDeleted")
-        },
-        movieEdited: {
-            subscribe: () => pubsub.asyncIterator("movieEdited")
-        }
     },
     Movie: {
         releaseDate,
