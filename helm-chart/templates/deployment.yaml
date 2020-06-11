@@ -33,7 +33,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["--mongo-uri=mongodb://movie-test-api-mongodb:27017/movies"]
+          args: ["--mongo-uri=mongodb://movie-backend-mongodb:27017/movies"]
           ports:
             - name: http
               containerPort: 3000
